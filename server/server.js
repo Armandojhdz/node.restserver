@@ -1,5 +1,7 @@
 require('./config/config');
+const mongoose = require('mongoose');
 const express = require('express');
+const user = require('./routes/user');
 const app = express();
 const bodyParser = require('body-parser');
 
@@ -11,40 +13,18 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 //-----------------------------------------------------
 
-//To get a user registru
-app.get('/user', function (req, res) {
-  res.json('get User');
-})
+//we reference the routes (routes are wrapped on route)
+app.use(user);
 
-//to creaate new registry in a db
-app.post('/user', function (req, res) {
-    let body = req.body;
-
-    if (body.name === undefined) {
-        res.status(400).json({
-            ok: false,
-            menssage: 'The name is necessary'
-        })
+mongoose.connect(process.env.URLDB, 
+{ useNewUrlParser :true, useCreateIndex: true, useUnifiedTopology: true},
+(err, res) =>{
+    if (err) {
+        throw err;
     } else {
-        res.json({
-            person : body
-        })
+        console.log('database ONLINE');
     }
 });
-
-//to update a user registry
-app.put('/user/:id', function (req, res) {
-    let userid = req.params.id;
-    res.json({
-        id : userid
-    });
-})
-
-// To delete a user registry
-app.delete('/user', function (req, res) {
-    res.json('delete User');
-})
-   
  
 app.listen(process.env.PORT,() =>{
     console.log('listening port: ', process.env.PORT);
