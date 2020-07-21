@@ -1,13 +1,23 @@
 const express = require('express');
-const User = require('../models/user');
-const app = express();
 //library to crypt the password
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
+const User = require('../models/user');
+const { verifyToken,verifyAdmin_Role } = require('../middlewares/authentication');
+const user = require('../models/user');
+
+const app = express();
 
 //To get a user registry
-app.get('/user', function (req, res) {
+app.get('/user', verifyToken ,(req, res) => {
     
+    return res.json({
+        user: req.user,
+        name: req.user.name,
+        email: req.user.email,
+
+    })
+
     //params to show registries
     let from = req.query.from || 0;
     from = Number(from);
@@ -26,7 +36,7 @@ app.get('/user', function (req, res) {
                 })
             }
 
-            User.count({status: true},(err, counting) =>{
+            User.countDocuments({status: true},(err, counting) =>{
                 res.json({
                     ok:true,
                     users,
@@ -42,7 +52,7 @@ app.get('/user', function (req, res) {
 })
   
 //to creaate new registry in a db
-app.post('/user', function (req, res) {
+app.post('/user', [verifyToken,verifyAdmin_Role],function (req, res) {
     let body = req.body;
 
     let user = new User({
@@ -71,12 +81,12 @@ app.post('/user', function (req, res) {
 });
   
 //to update a user registry
-app.put('/user/:id', function (req, res) {
+app.put('/user/:id', [verifyToken,verifyAdmin_Role],function (req, res) {
     let userid = req.params.id;
     //paratmers that are goin to be updated
     let body = _.pick( req.body ,['name','email','img','role','status']);
 
-    User.findByIdAndUpdate( userid , body ,{ new: true, runValidators: true }, (err, userDB) => {
+    User.findByIdAndUpdate( userid , body ,{ new: true, runValidators: true, useFindAndModify:false }, (err, userDB) => {
 
         if (err) {
             res.status(400).json({
@@ -92,7 +102,7 @@ app.put('/user/:id', function (req, res) {
 })
   
   // To delete a user registry
-  app.delete('/user/:id', function (req, res) {
+  app.delete('/user/:id', [verifyToken,verifyAdmin_Role],function (req, res) {
       
     let id =req.params.id;
     
@@ -101,7 +111,7 @@ app.put('/user/:id', function (req, res) {
     };
 
     //User.findByIdAndRemove(id,(err, userRemoved) => {
-    User.findByIdAndUpdate(id, changeStatus,{new :true}, (err, userRemoved) => {    
+    User.findByIdAndUpdate(id, changeStatus,{new :true ,useFindAndModify:false}, (err, userRemoved) => {    
     
         if (err) {
             return res.json({
