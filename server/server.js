@@ -4,6 +4,7 @@ const express = require('express');
 const routes= require('./routes/index');
 const app = express();
 const bodyParser = require('body-parser');
+const path = require('path');
 
 
 //-----------------------------------------------------
@@ -11,7 +12,12 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }))
  
 // parse application/json
-app.use(bodyParser.json())
+app.use(bodyParser.json());
+
+//Enable the folder public
+app.use( express.static( path.resolve( __dirname , '../public') ) );
+
+
 //-----------------------------------------------------
 
 //we reference the routes (routes are wrapped on route)
