@@ -12,16 +12,16 @@ let validRoles = {
 let userSchema = new Schema({
     name:{
         type: String,
-        required: [true, 'El nombre es necesario']
+        required: [true, 'The name is necessary']
     },
     email:{
         type: String,
         unique: true,
-        required: [true, 'El correro es necesario']
+        required: [true, 'the email is necessary']
     },
     password:{
         type: String,
-        required: [true, 'El pass es necesario']
+        required: [true, 'the password is necessary']
     },
     img:{
         type: String,
